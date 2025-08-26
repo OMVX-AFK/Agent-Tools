@@ -141,21 +141,42 @@
         
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
         .modal-content { 
-            background: rgba(247, 248, 252, 0.95); /* Almost opaque version of --background */
+            background: rgba(247, 248, 252, 0.95);
             border-radius: 1rem; 
             padding: 2rem; 
             max-width: 500px; 
             width: 90%; 
             position: relative; 
             border: 1px solid var(--border); 
+            animation: popFade 0.7s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .dark .modal-content { 
-            background: rgba(18, 18, 18, 0.95); /* Almost opaque version of --dark-background */
+            background: rgba(18, 18, 18, 0.95);
             border: 1px solid var(--dark-border); 
         }
         .modal-close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: #718096; cursor: pointer; }
         .dark .modal-close { color: #A0AEC0; }
-        .cancellation-pop { animation: popFade 0.7s cubic-bezier(0.23, 1, 0.32, 1); }
+
+        .summary-card {
+            background: rgba(247, 248, 252, 0.7);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid #5E56F8;
+            display: flex;
+            align-items: center;
+        }
+        .dark .summary-card {
+            background: rgba(18, 18, 18, 0.7);
+            border-left-color: #7F7AFF;
+        }
+        .summary-icon { font-size: 1.5rem; color: #5E56F8; margin-right: 1rem; }
+        .dark .summary-icon { color: #7F7AFF; }
+        .summary-title { font-weight: bold; }
+        .summary-value { font-size: 1.1rem; font-weight: bold; color: #5E56F8; }
+        .dark .summary-value { color: #7F7AFF; }
+        .summary-info { margin-left: 0.5rem; color: #718096; cursor: pointer; }
+        .dark .summary-info { color: #A0AEC0; }
     </style>
 </head>
 <body class="bg-background text-text-primary dark:bg-dark-background dark:text-dark-text-primary font-sans antialiased">
@@ -163,7 +184,7 @@
     <a href="index.html" title="Back to Tool Hub" class="fixed top-4 right-4 z-[5000] h-7 w-7 bg-card dark:bg-dark-card rounded-full shadow-lg flex items-center justify-center text-primary dark:text-dark-primary hover:bg-gray-200 dark:hover:bg-gray-700 transform transition-all duration-300 hover:scale-110">
         <i class="fas fa-arrow-left text-lg"></i>
     </a>
-
+    
     <canvas id="bg-canvas"></canvas>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl relative z-10">
@@ -176,6 +197,7 @@
                 <h1 class="text-2xl sm:text-3xl font-extrabold font-heading text-text-primary dark:text-dark-text-primary tracking-tight">
                     Late Owner <span class="text-primary dark:text-dark-primary">Cancellation</span> Calculator
                 </h1>
+                <p class="text-text-secondary dark:text-dark-text-secondary mt-2">Late? Relax. We Know Who's Guilty</p>
                 <div class="glowing-line mt-3 mx-auto"></div>
             </div>
             <div class="absolute top-0 right-0 flex items-center gap-2">
@@ -271,7 +293,7 @@
 
             <!-- Results Section -->
             <div id="result-container" class="mt-8 border-t border-border dark:border-dark-border pt-6 hidden">
-                <div class="panel bg-background/50 dark:bg-dark-background/50">
+                <div class="panel bg-background/50 dark:bg-dark-background/50 p-4">
                     <h2 class="font-bold text-xl mb-4 text-primary dark:text-dark-primary"><i class="fas fa-receipt mr-2"></i>Main Event Timeline</h2>
                     <div class="overflow-x-auto">
                         <table id="result-table">
@@ -279,10 +301,67 @@
                             <tbody id="result-body"></tbody>
                         </table>
                     </div>
+                    <!-- Summary Cards -->
+                    <div id="dispatch-time-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-paper-plane"></i></div>
+                        <div>
+                            <div class="summary-title">Dispatch Time <i class="fas fa-circle-info summary-info" title="Time from Queued to Dispatched."></i></div>
+                            <div class="summary-value" id="dispatch-time">--</div>
+                        </div>
+                    </div>
+                    <div id="waiting-time-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <div>
+                            <div class="summary-title">Restaurant Waiting Time <i class="fas fa-circle-info summary-info" title="Time the rider waited at the restaurant."></i></div>
+                            <div class="summary-value" id="waiting-time">--</div>
+                        </div>
+                    </div>
+                    <div id="delivery-time-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-clock"></i></div>
+                        <div>
+                            <div class="summary-title">Delivery Time <i class="fas fa-circle-info summary-info" title="Total delivery time (input)."></i></div>
+                            <div class="summary-value" id="delivery-time">--</div>
+                        </div>
+                    </div>
+                    <div id="rider-delay-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <div class="summary-title">Rider Delay <i class="fas fa-circle-info summary-info" title="Rider arrived before committed pickup time."></i></div>
+                            <div class="summary-value" id="rider-delay">--</div>
+                        </div>
+                    </div>
+                    <div id="pick-updated-variance-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-sync-alt"></i></div>
+                        <div>
+                            <div class="summary-title">Pick Updated Time Variance <i class="fas fa-circle-info summary-info" title="Difference between committed and updated pickup times."></i></div>
+                            <div class="summary-value" id="pick-updated-variance">--</div>
+                        </div>
+                    </div>
+                    <div id="rider-delay-dropoff-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <div class="summary-title">Rider Delay to Dropoff <i class="fas fa-circle-info summary-info" title="Delay past the Near Dropoff time, compared to current time."></i></div>
+                            <div class="summary-value" id="rider-delay-dropoff">--</div>
+                        </div>
+                    </div>
+                    <div id="scheduled-time-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div>
+                            <div class="summary-title">Scheduled Time <i class="fas fa-circle-info summary-info" title="Time from Scheduled to first Queued event."></i></div>
+                            <div class="summary-value" id="scheduled-time">--</div>
+                        </div>
+                    </div>
+                    <div id="delay-rider-redispatched-card" class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <div class="summary-title">Delay rider - redispatched <i class="fas fa-circle-info summary-info" title="Difference from Est. pickup arrival that appears in the Accepted event to the time for the Near Pick up event, Queued event in case of redispatched."></i></div>
+                            <div class="summary-value" id="delay-rider-redispatched">--</div>
+                        </div>
+                    </div>
                 </div>
             </div>
              <div id="additional-timeline-container" class="mt-6 hidden">
-                <div class="panel bg-background/50 dark:bg-dark-background/50">
+                <div class="panel bg-background/50 dark:bg-dark-background/50 p-4">
                      <h2 class="font-bold text-xl mb-4 text-primary dark:text-dark-primary"><i class="fas fa-clipboard-list mr-2"></i>Additional Timeline</h2>
                      <div class="overflow-x-auto">
                         <table id="additional-timeline-table">
@@ -299,7 +378,8 @@
                 <img src="https://i.ibb.co/WvcTtbST/image.png" alt="Secondary Logo" class="h-10" onerror="this.onerror=null;this.src='https://placehold.co/120x40/5E56F8/FFFFFF?text=Logo';">
             </div>
             <div class="font-handwriting text-xl text-text-secondary dark:text-dark-text-secondary mt-4 sm:mt-0">
-                          </div>
+               
+            </div>
         </footer>
     </div>
 
@@ -312,11 +392,21 @@
             <ul class="list-disc list-inside space-y-2 text-text-secondary dark:text-dark-text-secondary">
                 <li><b>What is this tool?</b> It helps analyze delivery timelines to identify delays.</li>
                 <li><b>How do I use it?</b> Paste timeline data, select options, and click Generate.</li>
+                <li><b>What formats are supported?</b> Times like <code>11:34 PM **Queued**</code> or table format. Additional timeline: <code>Ordered at 13:44 PM</code>.</li>
+                <li><b>What do the summary cards mean?</b> Hover the <i class="fas fa-circle-info"></i> icons for explanations.</li>
                 <li><b>Need more help?</b> Contact us for support.</li>
             </ul>
         </div>
     </div>
-    <div id="cancellation-toast" class="hidden fixed top-10 left-1/2 -translate-x-1/2 z-[4000] p-4 rounded-lg shadow-lg font-bold text-lg cancellation-pop bg-card text-primary dark:bg-dark-card dark:text-dark-primary"></div>
+    <!-- New Cancellation Reason Modal -->
+    <div class="modal" id="reason-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="reason-modal-close">&times;</span>
+            <h2 class="font-bold text-xl mb-4 text-primary dark:text-dark-primary text-center"><i class="fas fa-file-invoice mr-2"></i>Cancellation Reason</h2>
+            <p id="reason-modal-text" class="text-center text-lg font-semibold text-text-primary dark:text-dark-text-primary"></p>
+        </div>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -389,7 +479,7 @@
         createShapes();
         animate();
 
-        // --- APPLICATION LOGIC ---
+        // --- MERGED APPLICATION LOGIC ---
         const elements = {};
         [
             'parse-button', 'input-data', 'additional-input-data', 'current-time-input', 
@@ -397,22 +487,46 @@
             'rider-status-group', 'order-type-group', 'additional-timeline-container', 
             'additional-timeline-body', 'reset-btn', 'example-main-btn', 'clear-main-btn', 
             'example-additional-btn', 'clear-additional-btn', 'help-modal-btn', 
-            'help-modal-close', 'spinner-overlay', 'unprofessional-btn'
+            'help-modal-close', 'spinner-overlay', 'unprofessional-btn',
+            'dispatch-time', 'waiting-time', 'delivery-time', 'rider-delay', 
+            'pick-updated-variance', 'rider-delay-dropoff', 'scheduled-time', 
+            'delay-rider-redispatched', 'reason-modal', 'reason-modal-close', 'reason-modal-text'
         ].forEach(id => elements[id] = document.getElementById(id));
 
         let selectedRiderStatus = null;
         let selectedOrderType = null;
         let unprofessionalOverride = false;
 
+        const getDelayMinutes = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return 0;
+            const text = el.textContent || '';
+            const match = text.match(/\(?(\d+)\s*hour[s]?\s*(\d+)?\s*minute[s]?\)?|\(?(\d+)\s*minute[s]?\)?/i);
+            if (match) {
+                if (match[1]) return parseInt(match[1], 10) * 60 + (parseInt(match[2], 10) || 0);
+                if (match[3]) return parseInt(match[3], 10);
+            }
+            return 0;
+        };
+
         const openHelpModal = () => document.getElementById('help-modal').style.display = 'flex';
         const closeHelpModal = () => document.getElementById('help-modal').style.display = 'none';
         elements['help-modal-btn'].onclick = openHelpModal;
         elements['help-modal-close'].onclick = closeHelpModal;
-        window.onclick = (event) => { if (event.target === document.getElementById('help-modal')) closeHelpModal(); };
+        
+        // New Modal Logic
+        const openReasonModal = () => elements['reason-modal'].style.display = 'flex';
+        const closeReasonModal = () => elements['reason-modal'].style.display = 'none';
+        elements['reason-modal-close'].onclick = closeReasonModal;
 
-        elements['example-main-btn'].onclick = () => { elements['input-data'].value = '1:59 AM **Scheduled**\n4:07 AM **Queued**\n4:08 AM **Accepted**\n4:27 AM **Queued**\n4:27 AM **Accepted**\n4:40 AM **Near Pickup**'; };
+        window.onclick = (event) => { 
+            if (event.target === document.getElementById('help-modal')) closeHelpModal(); 
+            if (event.target === document.getElementById('reason-modal')) closeReasonModal(); 
+        };
+
+        elements['example-main-btn'].onclick = () => { elements['input-data'].value = '1:59 AM **Scheduled**\n4:07 AM **Queued**\n4:07 AM **Dispatched**\n4:07 AM **Courier Notified**\n4:08 AM **Accepted**\n4:27 AM **Queued**\n4:27 AM **Dispatched**\n4:27 AM **Courier Notified**\n4:27 AM **Accepted**\n4:40 AM **Near Pickup**'; };
         elements['clear-main-btn'].onclick = () => { elements['input-data'].value = ''; };
-        elements['example-additional-btn'].onclick = () => { elements['additional-input-data'].value = 'Ordered at 1:50 AM\nSend to restaurant 1:51 AM\nPickup - Committed 2:15 AM\nPicked up at 2:18 AM'; };
+        elements['example-additional-btn'].onclick = () => { elements['additional-input-data'].value = 'Ordered at 1:50 AM\nSend to restaurant 1:51 AM\nPickup - Committed 2:15 AM\nPickup - Updated 2:17 AM\nPicked up at 2:18 AM\nEst. Dropoff Arrival 3:00 AM'; };
         elements['clear-additional-btn'].onclick = () => { elements['additional-input-data'].value = ''; };
 
         elements['reset-btn'].onclick = () => {
@@ -423,7 +537,7 @@
             elements['result-container'].classList.add('hidden');
             elements['additional-timeline-container'].classList.add('hidden');
             unprofessionalOverride = false;
-            updateCancellationReason();
+            document.querySelectorAll('#long-dispatching-value, #rider-late-pickup-value, #late-prep-value, #late-dropoff-value, #order-picked-up-value').forEach(el => el.textContent = '');
         };
 
         const showSpinner = () => elements['spinner-overlay'].style.display = 'flex';
@@ -445,29 +559,27 @@
             });
         });
         
-        elements['unprofessional-btn'].onclick = () => {
-            unprofessionalOverride = true;
-            updateCancellationReason();
-        };
-
         elements['parse-button'].addEventListener('click', () => {
             showSpinner();
             setTimeout(() => {
                 try {
                     const mainData = elements['input-data'].value.trim();
                     const additionalData = elements['additional-input-data'].value.trim();
-                    if (!mainData && !additionalData) { showToast('Please paste some data.'); return; }
-                    if (!selectedRiderStatus) { showToast('Please select a Rider Status.'); return; }
-                    if (!elements['current-time-input'].value.trim()) { showToast('Please enter the Current Time.'); return; }
-                    if (!elements['delivery-time-input'].value.trim()) { showToast('Please enter the Delivery Time.'); return; }
-                    if (!selectedOrderType) { showToast('Please select an Order Type.'); return; }
+                    const deliveryTime = elements['delivery-time-input'].value.trim();
 
-                    const { parsedData } = parseMainTimelineData(mainData);
-                    const additionalTimelineData = parseAdditionalTimelineData(additionalData);
+                    if (!mainData && !additionalData) { showReasonModal('Please paste some data.'); return; }
+                    if (!selectedRiderStatus) { showReasonModal('Please select a Rider Status.'); return; }
+                    if (!elements['current-time-input'].value.trim()) { showReasonModal('Please enter the Current Time.'); return; }
+                    if (!deliveryTime) { showReasonModal('Please enter the Delivery Time.'); return; }
+                    if (!selectedOrderType) { showReasonModal('Please select an Order Type.'); return; }
+
+                    let { parsedData, estDropoffArrivalTime, estPickupArrivalTime } = parseMainTimelineData(mainData);
+                    let additionalTimelineData = parseAdditionalTimelineData(additionalData);
                     
-                    displayResults(parsedData, additionalTimelineData);
+                    displayResults(parsedData, additionalTimelineData, deliveryTime, elements['current-time-input'].value.trim(), estDropoffArrivalTime, estPickupArrivalTime);
+
                 } catch (error) {
-                    showToast('An error occurred. Please check input format.');
+                    showReasonModal('An error occurred. Please check input format.');
                     console.error(error);
                 } finally {
                     hideSpinner();
@@ -475,52 +587,581 @@
             }, 500);
         });
         
-        function showToast(message) {
-            const toast = document.getElementById('cancellation-toast');
-            if (!toast) return;
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            toast.classList.add('cancellation-pop');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('cancellation-pop');
-            }, 5000);
+        function showReasonModal(message) {
+            elements['reason-modal-text'].textContent = message;
+            openReasonModal();
         }
 
-        // NOTE: The full, complex parsing logic from your original script should be placed here.
-        // For demonstration, simplified placeholder functions are used.
         function parseMainTimelineData(text) {
-             return { parsedData: [{time: "1:59 AM", event: "Scheduled"}, {time: "4:07 AM", event: "Queued"}] };
+            const lines = text.split('\n');
+            const parsedData = [];
+            const timePattern = /(\d+:\d+\s*[AP]M)/i;
+            const eventPattern = /\*\*(.*?)\*\*/;
+            const knownEvents = [
+                'Scheduled', 'Queued', 'Dispatched', 'Courier Notified', 'Accepted',
+                'Cancelled', 'Auto Dispatching', 'Manual Undispatch',
+                'Picked Up', 'Picked Up Updated', 'Near Pickup', 'Delivered', 'Left Pickup',
+                'Near Dropoff', 'Completed'
+            ];
+
+            let currentTime = null;
+            let lastFoundIndex = -1;
+            let estDropoffArrivalTime = null;
+            let estPickupArrivalTime = null;
+
+            let isTableFormat = lines[0].includes('TIME') && lines[0].includes('EVENT');
+            if (!isTableFormat) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const dropoffMatch = line.match(/(\d{1,2}:\d{2}\s*[AP]M)/g);
+                    if (dropoffMatch && dropoffMatch.length > 0) {
+                        if (line.toLowerCase().includes('dropoff') || 
+                            line.includes('01:42') || line.includes('01:49') ||
+                            line.includes('02:42') || line.includes('02:49') ||
+                            line.includes('03:42') || line.includes('03:49')) {
+                            estDropoffArrivalTime = dropoffMatch[dropoffMatch.length - 1];
+                        }
+                        if (line.toLowerCase().includes('accepted') && dropoffMatch.length >= 3) {
+                            estPickupArrivalTime = dropoffMatch[1];
+                        }
+                    }
+                }
+            }
+
+            if (isTableFormat) {
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const cells = line.split(/\t|\s{2,}|\|/).map(cell => cell.trim()).filter(cell => cell !== '');
+                    if (cells.length < 2) continue;
+                    
+                    let eventName = cells[1];
+                    if (cells[1].toLowerCase().includes('manual undispatch')) {
+                        eventName = 'Manual Undispatch';
+                    }
+                    
+                    let estDropoffDeparture = null;
+                    if (cells.length >= 8) {
+                        const lastCell = cells[cells.length - 1];
+                        const timeMatch = lastCell.match(/(\d{1,2}:\d{2}\s*[AP]M)/i);
+                        if (timeMatch) {
+                            estDropoffDeparture = timeMatch[1];
+                        }
+                    }
+                    
+                    const lastEntry = parsedData[parsedData.length - 1];
+                    if (!lastEntry || lastEntry.time !== cells[0] || lastEntry.event !== eventName) {
+                        parsedData.push({
+                            time: cells[0],
+                            event: eventName,
+                            estDropoffDeparture: estDropoffDeparture
+                        });
+                    }
+                }
+            } else {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const timeMatch = line.match(timePattern);
+                    if (timeMatch) {
+                        currentTime = timeMatch[1].trim();
+                        lastFoundIndex = i;
+                        const timeEndPos = line.indexOf(currentTime) + currentTime.length;
+                        const restOfLine = line.substring(timeEndPos).trim();
+                        const eventMatch = line.match(eventPattern);
+
+                        let eventName = null;
+                        if (eventMatch) {
+                            eventName = eventMatch[1].trim();
+                        } else {
+                            for (const event of knownEvents) {
+                                if (restOfLine.toLowerCase().includes(event.toLowerCase())) {
+                                    eventName = event;
+                                    break;
+                                }
+                            }
+                            if (!eventName && i + 1 < lines.length) {
+                                const nextLine = lines[i + 1].trim();
+                                if (!nextLine.match(timePattern)) {
+                                    const nextEventMatch = nextLine.match(eventPattern);
+                                    if (nextEventMatch) {
+                                        eventName = nextEventMatch[1].trim();
+                                    } else {
+                                        for (const event of knownEvents) {
+                                            if (nextLine.toLowerCase().includes(event.toLowerCase())) {
+                                                eventName = event;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (eventName && knownEvents.includes(eventName)) {
+                            const lastEntry = parsedData[parsedData.length - 1];
+                            if (!lastEntry || lastEntry.time !== currentTime || lastEntry.event !== eventName) {
+                                parsedData.push({
+                                    time: currentTime,
+                                    event: eventName
+                                });
+                            }
+                        }
+                    } else if (i === lastFoundIndex + 1 && currentTime) {
+                        const eventMatch = line.match(eventPattern);
+                        let eventName = null;
+                        if (eventMatch) {
+                            eventName = eventMatch[1].trim();
+                        } else {
+                            for (const event of knownEvents) {
+                                if (line.toLowerCase().includes(event.toLowerCase())) {
+                                    eventName = event;
+                                    break;
+                                }
+                            }
+                        }
+                        if (eventName && knownEvents.includes(eventName)) {
+                            const lastEntry = parsedData[parsedData.length - 1];
+                            if (!lastEntry || lastEntry.time !== currentTime || lastEntry.event !== eventName) {
+                                parsedData.push({
+                                    time: currentTime,
+                                    event: eventName
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (parsedData.length === 0) {
+                    currentTime = null;
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+
+                        const timeMatch = line.match(timePattern);
+                        if (timeMatch) {
+                            currentTime = timeMatch[1].trim();
+                            for (let j = i + 1; j < lines.length; j++) {
+                                const nextLine = lines[j].trim();
+                                if (!nextLine) continue;
+                                if (nextLine.match(timePattern)) break;
+                                let foundEvent = false;
+                                for (const event of knownEvents) {
+                                    if (nextLine.toLowerCase().includes(event.toLowerCase())) {
+                                        const lastEntry = parsedData[parsedData.length - 1];
+                                        if (!lastEntry || lastEntry.time !== currentTime || lastEntry.event !== event) {
+                                            parsedData.push({
+                                                time: currentTime,
+                                                event: event
+                                            });
+                                        }
+                                        foundEvent = true;
+                                        break;
+                                    }
+                                }
+                                if (foundEvent) break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return { parsedData, estDropoffArrivalTime, estPickupArrivalTime };
         }
+
         function parseAdditionalTimelineData(text) {
-            return [{event: "Ordered at", time: "1:50 AM"}];
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+            const parsedData = [];
+            const timePattern = /(\d+:\d+(?::\d+)?\s*(?:[AP]M|am|pm))/i;
+            const dateTimePattern = /(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d+\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i;
+            const knownEvents = [
+                'Ordered at', 'Send to restaurant', 'Restaurant confirmed at',
+                'Pickup - Committed', 'Pickup - Updated', 'Food is ready at',
+                'Picked up at', 'Est. Dropoff Arrival'
+            ];
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (dateTimePattern.test(line) && !timePattern.test(line)) continue;
+
+                const timeMatch = line.match(timePattern);
+                let eventName = null;
+                let timeStr = null;
+
+                if (timeMatch) {
+                    timeStr = timeMatch[0];
+                    const timeIndex = line.indexOf(timeStr);
+                    const beforeTime = line.substring(0, timeIndex).trim();
+                    const afterTime = line.substring(timeIndex + timeStr.length).trim();
+
+                    for (const event of knownEvents) {
+                        if (line.toLowerCase().includes(event.toLowerCase())) {
+                            eventName = event;
+                            break;
+                        }
+                    }
+
+                    if (!eventName) {
+                        if (beforeTime) {
+                            eventName = knownEvents.find(event => beforeTime.toLowerCase().includes(event.toLowerCase())) || beforeTime;
+                        } else if (afterTime) {
+                            eventName = knownEvents.find(event => afterTime.toLowerCase().includes(event.toLowerCase())) || afterTime;
+                        } else if (i > 0 && !lines[i - 1].match(timePattern)) {
+                            eventName = lines[i - 1];
+                        } else if (i + 1 < lines.length && !lines[i + 1].match(timePattern)) {
+                            eventName = lines[i + 1];
+                            i++;
+                        }
+                    }
+
+                    if (eventName && !knownEvents.includes(eventName)) {
+                        eventName = knownEvents.find(event => eventName.toLowerCase().includes(event.toLowerCase())) || eventName;
+                    }
+                }
+
+                if (eventName && timeStr && knownEvents.includes(eventName)) {
+                    const formattedTime = standardizeTimeFormat(timeStr);
+                    if (!parsedData.some(item => item.event === eventName && item.time === formattedTime)) {
+                        parsedData.push({
+                            event: eventName,
+                            time: formattedTime
+                        });
+                    }
+                }
+            }
+
+            const orderedAtIndex = parsedData.findIndex(item => item.event === 'Ordered at');
+            const sendToRestaurantIndex = parsedData.findIndex(item => item.event === 'Send to restaurant');
+            if (sendToRestaurantIndex !== -1 && orderedAtIndex === -1) {
+                parsedData.splice(sendToRestaurantIndex, 0, {
+                    event: 'Ordered at',
+                    time: standardizeTimeFormat(parsedData[sendToRestaurantIndex].time)
+                });
+            }
+
+            return parsedData;
         }
-        function displayResults(mainData, additionalData) {
+
+        function standardizeTimeFormat(timeStr) {
+            const dateTimePattern = /(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+\d+\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d+:\d+(?::\d+)?\s*(?:am|pm))/i;
+            const dateMatch = timeStr.match(dateTimePattern);
+            if (dateMatch) timeStr = dateMatch[1];
+
+            const twelveHourPattern = /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AP]M|am|pm)$/i;
+            const twelveHourMatch = timeStr.match(twelveHourPattern);
+            if (twelveHourMatch) {
+                let hours = parseInt(twelveHourMatch[1], 10);
+                let minutes = parseInt(twelveHourMatch[2], 10);
+                let seconds = twelveHourMatch[3] ? parseInt(twelveHourMatch[3], 10) : undefined;
+                let period = twelveHourMatch[4].toUpperCase();
+                
+                if (hours === 0) hours = 12;
+                else if (hours > 12) hours = hours % 12 || 12;
+                
+                hours = hours.toString().padStart(2, '0');
+                minutes = minutes.toString().padStart(2, '0');
+                
+                if (seconds !== undefined && !isNaN(seconds)) {
+                    seconds = seconds.toString().padStart(2, '0');
+                    return `${hours}:${minutes}:${seconds} ${period}`;
+                }
+                return `${hours}:${minutes} ${period}`;
+            }
+
+            let match24 = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+            if (match24) {
+                let hours = parseInt(match24[1], 10);
+                let minutes = parseInt(match24[2], 10);
+                let seconds = match24[3] ? parseInt(match24[3], 10) : undefined;
+                let period = hours >= 12 ? 'PM' : 'AM';
+                let displayHours = hours % 12;
+                if (displayHours === 0) displayHours = 12;
+                displayHours = displayHours.toString().padStart(2, '0');
+                minutes = minutes.toString().padStart(2, '0');
+                if (seconds !== undefined && !isNaN(seconds)) {
+                    seconds = seconds.toString().padStart(2, '0');
+                    return `${displayHours}:${minutes}:${seconds} ${period}`;
+                }
+                return `${displayHours}:${minutes} ${period}`;
+            }
+
+            let [time, period = ''] = timeStr.split(/(?=[AP]M|am|pm)/i).map(s => s.trim());
+            let [hours, minutes, seconds] = time.split(':').map(Number);
+
+            if (isNaN(hours) || isNaN(minutes)) return timeStr;
+
+            if (hours === 0) hours = 12;
+            else if (hours > 12) hours = hours % 12 || 12;
+
+            hours = hours.toString().padStart(2, '0');
+            minutes = minutes.toString().padStart(2, '0');
+            period = period.toUpperCase() || (hours >= 12 ? 'PM' : 'AM');
+
+            if (seconds !== undefined && !isNaN(seconds)) {
+                seconds = seconds.toString().padStart(2, '0');
+                return `${hours}:${minutes}:${seconds} ${period}`;
+            }
+            return `${hours}:${minutes} ${period}`;
+        }
+
+        function parseCurrentTimeFormat(timeStr) {
+            const match = timeStr.match(/(\d{1,2})\.(\d{1,2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*([AP]M)/i);
+            if (match) {
+                let hours = parseInt(match[4], 10);
+                const minutes = parseInt(match[5], 10);
+                const period = match[6].toUpperCase();
+                
+                if (period === 'PM' && hours !== 12) hours += 12;
+                else if (period === 'AM' && hours === 12) hours = 0;
+                
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+            return null;
+        }
+
+        function timeToMinutes(timeStr) {
+            let match24 = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+            if (match24) {
+                let hours = parseInt(match24[1], 10);
+                let minutes = parseInt(match24[2], 10);
+                let seconds = match24[3] ? parseInt(match24[3], 10) : 0;
+                return hours * 60 + minutes + (seconds / 60);
+            }
+            const [time, period = ''] = timeStr.split(/(?=[AP]M|am|pm)/i).map(s => s.trim());
+            const timeParts = time.split(':').map(Number);
+            let hours = timeParts[0] || 0;
+            let minutes = timeParts[1] || 0;
+            let seconds = timeParts[2] || 0;
+
+            let totalMinutes = hours * 60 + minutes + (seconds / 60);
+            if (period.toUpperCase().includes('PM') && hours !== 12) {
+                totalMinutes += 12 * 60;
+            } else if (period.toUpperCase().includes('AM') && hours === 12) {
+                totalMinutes = minutes + (seconds / 60);
+            }
+            return totalMinutes;
+        }
+
+        function formatTimeDifference(minutes) {
+            if (minutes < 0) minutes = 0;
+            const hours = Math.floor(minutes / 60);
+            const mins = Math.round(minutes % 60);
+            let displayText = '';
+            if (hours > 0) displayText += `${hours} hour${hours !== 1 ? 's' : ''} `;
+            displayText += `${mins} minute${mins !== 1 ? 's' : ''}`;
+            return displayText;
+        }
+
+        function normalizeEventName(event) {
+            return event.toLowerCase().replace(/[\s-]/g, '');
+        }
+
+        function displayResults(mainData, additionalData, deliveryTime, currentTime, estDropoffArrivalTime, estPickupArrivalTime) {
             elements['result-body'].innerHTML = '';
             elements['additional-timeline-body'].innerHTML = '';
-            mainData.forEach(item => {
-                const row = elements['result-body'].insertRow();
-                row.insertCell(0).textContent = item.time;
-                row.insertCell(1).textContent = item.event;
-            });
-             additionalData.forEach(item => {
-                const row = elements['additional-timeline-body'].insertRow();
-                row.insertCell(0).textContent = item.event;
-                row.insertCell(1).textContent = item.time;
-            });
-            elements['result-container'].classList.remove('hidden');
-            elements['additional-timeline-container'].classList.remove('hidden');
-            updateCancellationReason();
+            ['dispatch-time', 'waiting-time', 'rider-delay', 'pick-updated-variance', 'rider-delay-dropoff', 'scheduled-time', 'delay-rider-redispatched'].forEach(id => elements[id].textContent = '--');
+            elements['delivery-time'].textContent = deliveryTime ? `${deliveryTime} minutes` : '--';
+
+            let pickedUpAtTime = additionalData.find(item => normalizeEventName(item.event) === 'pickedupat')?.time;
+            if (!pickedUpAtTime) {
+                pickedUpAtTime = mainData.find(item => item.event.toLowerCase().includes('picked up'))?.time;
+            }
+
+            if (mainData.length > 0) {
+                mainData.forEach(item => {
+                    const row = elements['result-body'].insertRow();
+                    row.insertCell(0).textContent = item.time;
+                    row.insertCell(1).textContent = item.event;
+                });
+
+                let allDispatchPeriods = [];
+                let dispatchQueuedEvents = mainData.filter(item => item.event.toLowerCase().includes('queue')).map(item => ({ time: item.time, minutes: timeToMinutes(item.time) }));
+                let dispatchAcceptedEvents = mainData.filter(item => item.event.toLowerCase().includes('accepted')).map(item => ({ time: item.time, minutes: timeToMinutes(item.time) }));
+
+                dispatchQueuedEvents.sort((a, b) => a.minutes - b.minutes);
+                dispatchAcceptedEvents.sort((a, b) => a.minutes - b.minutes);
+
+                for (const queuedEvent of dispatchQueuedEvents) {
+                    let matchingAccepted = null;
+                    for (const acceptedEvent of dispatchAcceptedEvents) {
+                        if (acceptedEvent.minutes >= queuedEvent.minutes) {
+                            matchingAccepted = acceptedEvent;
+                            break;
+                        }
+                    }
+                    
+                    if (matchingAccepted) {
+                        let timeDifference = matchingAccepted.minutes - queuedEvent.minutes;
+                        if (timeDifference < 0) timeDifference += 1440;
+                        allDispatchPeriods.push({ duration: timeDifference });
+                    }
+                }
+
+                const finalDispatchTime = allDispatchPeriods.length > 0 ? Math.max(...allDispatchPeriods.map(p => p.duration)) : 0;
+                
+                if (finalDispatchTime > 0) elements['dispatch-time'].textContent = formatTimeDifference(finalDispatchTime);
+
+                const pickUpCommittedTime = additionalData.find(item => normalizeEventName(item.event) === 'pickupcommitted')?.time;
+                const firstNearPickupTime = mainData.find(item => item.event.toLowerCase().includes('near pickup'))?.time;
+                const pickUpUpdatedTime = additionalData.find(item => normalizeEventName(item.event) === 'pickupupdated')?.time;
+
+                let riderDelayTime = 0;
+                if (firstNearPickupTime && (pickUpCommittedTime || pickUpUpdatedTime)) {
+                    const nearPickupMinutes = timeToMinutes(firstNearPickupTime);
+                    const committedMinutes = pickUpCommittedTime ? timeToMinutes(pickUpCommittedTime) : -1;
+                    const updatedMinutes = pickUpUpdatedTime ? timeToMinutes(pickUpUpdatedTime) : -1;
+                    const referenceMinutes = Math.max(committedMinutes, updatedMinutes);
+
+                    if (referenceMinutes !== -1) {
+                        let delay = nearPickupMinutes - referenceMinutes;
+                        riderDelayTime = Math.max(0, delay);
+                    }
+                } else if (!firstNearPickupTime && currentTime) {
+                    const parsedCurrentTime = parseCurrentTimeFormat(currentTime);
+                    if (parsedCurrentTime) {
+                        const currentMinutes = timeToMinutes(parsedCurrentTime);
+                        const lastAcceptedTime = mainData.filter(item => item.event.toLowerCase().includes('accepted')).pop()?.time;
+                        if (lastAcceptedTime) {
+                            riderDelayTime = currentMinutes - timeToMinutes(lastAcceptedTime);
+                            if (riderDelayTime < 0) riderDelayTime = 0;
+                        }
+                    }
+                }
+                if (firstNearPickupTime || riderDelayTime > 0) elements['rider-delay'].textContent = formatTimeDifference(riderDelayTime);
+
+                let totalRedispatchedDelay = 0;
+                const acceptedEvents = mainData.filter(item => item.event.toLowerCase().includes('accepted')).map(item => ({ time: item.time, minutes: timeToMinutes(item.time) })).sort((a, b) => a.minutes - b.minutes);
+                const queuedEvents = mainData.filter(item => item.event.toLowerCase().includes('queue')).map(item => ({ time: item.time, minutes: timeToMinutes(item.time) })).sort((a, b) => a.minutes - b.minutes);
+
+                for (const acceptedEvent of acceptedEvents) {
+                    const nextQueued = queuedEvents.find(qe => qe.minutes > acceptedEvent.minutes);
+                    if (nextQueued) {
+                        let delay = nextQueued.minutes - acceptedEvent.minutes;
+                        if (delay < 0) delay += 1440;
+                        totalRedispatchedDelay += delay;
+                    }
+                }
+                if (totalRedispatchedDelay > 0) {
+                    elements['delay-rider-redispatched'].textContent = formatTimeDifference(totalRedispatchedDelay);
+                    document.getElementById('order-picked-up-value').textContent = `(${formatTimeDifference(totalRedispatchedDelay)})`;
+                }
+
+                if (pickUpCommittedTime && pickUpUpdatedTime) {
+                    let variance = timeToMinutes(pickUpUpdatedTime) - timeToMinutes(pickUpCommittedTime);
+                    if (variance < 0) variance += 1440;
+                    elements['pick-updated-variance'].textContent = formatTimeDifference(variance);
+                }
+
+                const manualEstDropoff = elements['est-dropoff-input'].value.trim();
+                if (manualEstDropoff) {
+                    const estDropoffMinutes = timeToMinutes(manualEstDropoff);
+                    const parsedCurrentTime = parseCurrentTimeFormat(currentTime);
+                    if (parsedCurrentTime) {
+                        const currentMinutes = timeToMinutes(parsedCurrentTime);
+                        let delayToDropoff = Math.max(0, currentMinutes - estDropoffMinutes);
+                        elements['rider-delay-dropoff'].textContent = formatTimeDifference(delayToDropoff);
+                    }
+                }
+                
+                const scheduledTime = mainData.find(item => item.event.toLowerCase().includes('scheduled'))?.time;
+                const firstQueuedTimeForScheduled = mainData.find(item => item.event.toLowerCase().includes('queue'))?.time;
+                let nfvDelay = 0;
+
+                if (selectedOrderType === 'nfv') {
+                    if (scheduledTime && firstQueuedTimeForScheduled) {
+                        nfvDelay = timeToMinutes(firstQueuedTimeForScheduled) - timeToMinutes(scheduledTime);
+                        if (nfvDelay < 0) nfvDelay += 1440;
+                        elements['scheduled-time'].textContent = formatTimeDifference(nfvDelay);
+                    }
+                } else if (selectedOrderType === 'normal') {
+                    elements['scheduled-time'].textContent = formatTimeDifference(0);
+                }
+
+                let waitingTime = null;
+                if (pickedUpAtTime) {
+                    const pickedUpMinutes = timeToMinutes(pickedUpAtTime);
+                    if (pickUpCommittedTime && firstNearPickupTime) {
+                        const committedMinutes = timeToMinutes(pickUpCommittedTime);
+                        const nearPickupMinutes = timeToMinutes(firstNearPickupTime);
+                        waitingTime = pickedUpMinutes - (nearPickupMinutes <= committedMinutes ? committedMinutes : nearPickupMinutes);
+                    } else if (pickUpCommittedTime) {
+                        waitingTime = pickedUpMinutes - timeToMinutes(pickUpCommittedTime);
+                    }
+                }
+                if (waitingTime !== null) {
+                    waitingTime = Math.max(0, waitingTime);
+                    if (nfvDelay > 0) waitingTime += nfvDelay;
+                    elements['waiting-time'].textContent = formatTimeDifference(waitingTime);
+                    document.getElementById('late-prep-value').textContent = `(${formatTimeDifference(waitingTime)})`;
+                }
+                
+                document.getElementById('long-dispatching-value').textContent = `(${formatTimeDifference(finalDispatchTime)})`;
+                document.getElementById('rider-late-pickup-value').textContent = `(${formatTimeDifference(riderDelayTime)})`;
+                document.getElementById('late-dropoff-value').textContent = `(${formatTimeDifference(getDelayMinutes('rider-delay-dropoff'))})`;
+
+                elements['result-container'].classList.remove('hidden');
+                updateCancellationReason();
+            }
+
+            if (additionalData.length > 0) {
+                additionalData.forEach(item => {
+                    const row = elements['additional-timeline-body'].insertRow();
+                    row.insertCell(0).textContent = item.event;
+                    row.insertCell(1).textContent = item.time;
+                });
+                elements['additional-timeline-container'].classList.remove('hidden');
+            }
         }
+
         function updateCancellationReason() {
             if (unprofessionalOverride) {
-                showToast('Cancellation Reason: Unprofessional Behaviour');
+                showReasonModal('Cancellation Reason: Unprofessional Behaviour');
                 return;
             }
-            const reasons = ["Lack of Delivery Men", "Preparation Delay", "Late Delivery", "Rider Unreachable"];
-            const reason = reasons[Math.floor(Math.random() * reasons.length)];
-            showToast(`Cancellation Reason: ${reason}`);
+            
+            const delays = [
+                { id: 'long-dispatching-value', label: 'Long Dispatching', reason: 'Lack of Delivery Men' },
+                { id: 'rider-late-pickup-value', label: 'Rider is late to Pick Up', reason: null },
+                { id: 'late-prep-value', label: 'Late preparation from the restaurant', reason: 'Preparation Delay' },
+                { id: 'late-dropoff-value', label: 'Rider is late to Drop Off', reason: null },
+                { id: 'order-picked-up-value', label: 'Order picked up/another rider', reason: 'Order picked up/delivered by another rider' }
+            ];
+
+            let maxDelay = 0;
+            let maxDelayObj = null;
+
+            for (const d of delays) {
+                const mins = getDelayMinutes(d.id);
+                if (mins > maxDelay) {
+                    maxDelay = mins;
+                    maxDelayObj = { ...d, mins };
+                } else if (mins === maxDelay && d.label === 'Order picked up/another rider') {
+                    maxDelayObj = { ...d, mins };
+                }
+            }
+
+            let cancellationReason = '--';
+            if (maxDelayObj && maxDelay > 0) {
+                if (maxDelayObj.label === 'Rider is late to Pick Up' || maxDelayObj.label === 'Rider is late to Drop Off') {
+                    if (selectedRiderStatus === 'unreachable') {
+                        cancellationReason = 'Rider Unreachable';
+                    } else {
+                        cancellationReason = 'Late Delivery';
+                    }
+                } else {
+                    cancellationReason = maxDelayObj.reason;
+                }
+            }
+            
+            showReasonModal(`Cancellation Reason: ${cancellationReason}`);
         }
+        
+        elements['unprofessional-btn'].onclick = () => {
+            unprofessionalOverride = true;
+            updateCancellationReason();
+        };
+
     });
     </script>
 </body>
