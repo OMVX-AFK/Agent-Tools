@@ -48,11 +48,24 @@
         @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px 0px rgba(94, 86, 248, 0.4); } 50% { box-shadow: 0 0 30px 5px rgba(94, 86, 248, 0.6); } }
         .dark .logo-glow { animation-name: pulse-glow-dark; }
         @keyframes pulse-glow-dark { 0%, 100% { box-shadow: 0 0 15px 0px rgba(127, 122, 255, 0.4); } 50% { box-shadow: 0 0 30px 5px rgba(127, 122, 255, 0.6); } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes popFade { 0% { transform: scale(0.95) translateY(20px); opacity: 0; } 60% { transform: scale(1.05) translateY(-5px); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-
+        @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        @keyframes popIn { 0% { transform: scale(0.7); opacity: 0; } 80% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeInBg { 0% { background: rgba(0, 0, 0, 0); } 100% { background: rgba(0, 0, 0, 0.25); } }
+        @keyframes blink { 50% { background-color: #fca5a5; } }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .error {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+            border: 1px solid red !important;
+        }
+        
         #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
         body::before {
             content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -71,26 +84,19 @@
         }
         .dark .glowing-line { background: linear-gradient(90deg, transparent, #7F7AFF, #F472B6, #7F7AFF, transparent); background-size: 200% 100%; }
 
-        /* Themed styles for form elements */
+        /* Form elements */
         .form-input, select {
-            background-color: rgba(255, 255, 255, 0.7) !important;
-            border: 1px solid #E2E8F0 !important;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.7) !important; border: 1px solid #E2E8F0 !important;
+            border-radius: 0.5rem; transition: all 0.2s ease-in-out;
         }
         .dark .form-input, .dark select {
-            background-color: rgba(40, 40, 40, 0.7) !important;
-            border-color: #2D3748 !important;
-            color: #f1f1f1;
+            background-color: rgba(40, 40, 40, 0.7) !important; border-color: #2D3748 !important; color: #f1f1f1;
         }
         .form-input:focus, select:focus {
-            box-shadow: 0 0 0 3px rgba(94, 86, 248, 0.4);
-            border-color: #5E56F8 !important;
-            outline: none;
+            box-shadow: 0 0 0 3px rgba(94, 86, 248, 0.4); border-color: #5E56F8 !important; outline: none;
         }
         .dark .form-input:focus, .dark select:focus {
-             box-shadow: 0 0 0 3px rgba(127, 122, 255, 0.4);
-            border-color: #7F7AFF !important;
+             box-shadow: 0 0 0 3px rgba(127, 122, 255, 0.4); border-color: #7F7AFF !important;
         }
         .form-label { font-weight: bold; display: block; text-align: left; margin-bottom: 0.5rem; }
         
@@ -103,53 +109,47 @@
             background-color: #7F7AFF; color: #121212; border-color: #9592FF;
         }
 
-        /* Floating Panels and Buttons */
+        /* Floating Panels */
         .floating-panel {
-            position: fixed;
-            width: 280px;
-            padding: 1rem;
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            z-index: 1000;
-            transition: transform 0.5s ease-in-out;
+            position: fixed; width: 280px; padding: 1rem; border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25); z-index: 1000;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            transform: translateX(-150%); opacity: 0;
         }
-        #failedTrials { top: 25%; left: 32px; transform: translateX(-150%); }
-        #failedTrials.show { transform: translateX(0); }
+        .floating-panel.show { transform: translateX(0); opacity: 1;}
+        #failedTrials { top: 25%; left: 32px; }
         #timeCalculator { top: 25%; right: 32px; transform: translateX(150%); }
-        #timeCalculator.show { transform: translateX(0); }
-        #refundSlaPanel { bottom: 80px; left: 32px; transform: translateX(-150%); }
-        #refundSlaPanel.show { transform: translateX(0); }
+        #timeCalculator.show { transform: translateX(0); opacity: 1; }
+        #refundSlaPanel { bottom: 80px; left: 32px; }
+        #compensation { top: 45%; left: 32px; }
+        #thirdReminder { top: 65%; left: 32px; }
+        #rightReminder { top: 45%; right: 32px; transform: translateX(150%); }
+        #rightReminder.show { transform: translateX(0); opacity: 1; }
 
-        .floating-btn {
-            position: fixed; z-index: 1001; width: 56px; height: 56px;
-            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s ease;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+        /* Popups */
+        .popup-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.25); z-index: 3000;
+            align-items: center; justify-content: center; animation: fadeInBg 0.4s;
         }
-        .dark .floating-btn {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .popup-overlay.show { display: flex; }
+        .popup-content {
+            background: white; color: #1A202C; border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); padding: 2rem;
+            min-width: 340px; max-width: 95vw; text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
-        .floating-btn:hover { 
-            transform: scale(1.1); 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        #toggleFailedTrialsBtn { top: 15%; left: 32px; background-color: rgba(239, 68, 68, 0.7); color: white; }
-        #toggleTimeCalcBtn { top: 15%; right: 32px; background-color: rgba(59, 130, 246, 0.7); color: white; }
-        #toggleRefundSlaBtn { bottom: 20px; left: 32px; background-color: rgba(245, 158, 11, 0.7); color: white; }
-        #toggleFailedTrialsBtn:hover { background-color: rgba(220, 38, 38, 0.9); }
-        #toggleTimeCalcBtn:hover { background-color: rgba(37, 99, 235, 0.9); }
-        #toggleRefundSlaBtn:hover { background-color: rgba(217, 119, 6, 0.9); }
+        .dark .popup-content { background: #1A202C; color: #F7FAFC; }
+        .popup-content h3 { font-size: 1.3em; margin-bottom: 1rem; color: #5E56F8; }
+        .dark .popup-content h3 { color: #7F7AFF; }
 
-        .marquee {
-            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 999;
-            background-color: var(--secondary); color: white;
-            padding: 0.5rem 0; overflow: hidden; white-space: nowrap;
-        }
-        .dark .marquee { background-color: var(--dark-secondary); color: var(--dark-background); }
-        .marquee-text { display: inline-block; padding-left: 100%; animation: scroll 60s linear infinite; }
+        /* Order Timers */
+        .order-timer-item { transition: all 0.3s ease; }
+        .timer-progress-bar { transition: width 1s linear; }
+
+        /* Marquee */
+        .marquee { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 999; overflow: hidden; white-space: nowrap; }
+        .marquee-text { display: inline-block; animation: scroll 40s linear infinite; }
     </style>
 </head>
 <body class="bg-background text-text-primary dark:bg-dark-background dark:text-dark-text-primary font-sans antialiased">
@@ -157,7 +157,6 @@
     <a href="index.html" title="Back to Tool Hub" class="fixed top-4 right-4 z-[5000] h-7 w-7 bg-card dark:bg-dark-card rounded-full shadow-lg flex items-center justify-center text-primary dark:text-dark-primary hover:bg-gray-200 dark:hover:bg-gray-700 transform transition-all duration-300 hover:scale-110">
         <i class="fas fa-arrow-left text-lg"></i>
     </a>
-
     <canvas id="bg-canvas"></canvas>
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl relative z-10">
@@ -172,7 +171,7 @@
                 </h1>
                 <div class="glowing-line mt-3 mx-auto"></div>
             </div>
-            <button id="theme-toggle" class="absolute top-0 right-0 p-2 rounded-full text-text-secondary dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-dark-primary transition-transform duration-300">
+            <button id="theme-toggle" class="absolute top-0 right-16 p-2 rounded-full text-text-secondary dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-dark-primary transition-transform duration-300">
                 <svg id="theme-toggle-light-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 <svg id="theme-toggle-dark-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
             </button>
@@ -181,22 +180,22 @@
         <main class="bg-card dark:bg-dark-card p-6 sm:p-8 rounded-2xl shadow-2xl glass-card animate-fadeInUp" style="animation-delay: 200ms;">
             <div class="max-w-md mx-auto">
                 <div class="flex justify-end mb-4">
-                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm" onclick="resetFormFields(0)">
+                    <button id="resetBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm">
                         <i class="fas fa-sync-alt mr-2"></i>Reset
                     </button>
                 </div>
                 <div class="space-y-4">
                     <div>
                         <label for="chatStart" class="form-label">Chat Start Time:</label>
-                        <input type="text" id="chatStart" class="form-input w-full p-2" placeholder="21.01.2025, 05:10 PM" />
+                        <input type="text" id="chatStart" class="form-input w-full p-2" placeholder="22.08.2025, 03:27 AM" />
                     </div>
                     <div>
                         <label for="orderPlacing" class="form-label">Order Placing Time:</label>
-                        <input type="text" id="orderPlacing" class="form-input w-full p-2" placeholder="Apr 19, 2025 05:18 PM" />
+                        <input type="text" id="orderPlacing" class="form-input w-full p-2" placeholder="22.8.2025, 2:18 AM" />
                     </div>
                     <div>
                         <label for="orderDelivery" class="form-label">Delivery Time (in minutes):</label>
-                        <input type="number" id="orderDelivery" class="form-input w-full p-2" placeholder="75" />
+                        <input type="text" id="orderDelivery" class="form-input w-full p-2" placeholder="75" />
                     </div>
                     <div class="service-selection grid grid-cols-2 gap-2">
                         <div class="service-option">
@@ -221,21 +220,22 @@
                             </div>
                         </div>
                     </div>
-                    <button id="calculateBtn" class="w-full bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <button id="calculateBtn" class="w-full bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
                         Check Order Status
                     </button>
-                    <div id="result" class="text-center font-bold text-lg p-4 rounded-lg hidden"></div>
+                    <div id="result" class="text-center font-bold text-lg p-4 rounded-lg hidden mt-4"></div>
+                    
+                    <hr class="my-6 border-border dark:border-dark-border"/>
+
+                    <div>
+                        <label for="orderIdInput" class="form-label">Order ID to Follow:</label>
+                        <input type="text" id="orderIdInput" class="form-input w-full p-2" placeholder="Enter Order ID" />
+                    </div>
+                    <button id="startCountdownBtn" class="w-full bg-transparent hover:bg-primary dark:hover:bg-dark-primary text-secondary dark:text-dark-secondary hover:text-white dark:hover:text-dark-background font-bold py-3 px-6 rounded-lg shadow-lg border-2 border-secondary dark:border-dark-secondary transition-colors duration-300">Start 10-min Countdown</button>
+                    <div id="orderTimers" class="mt-4 space-y-2"></div>
                 </div>
             </div>
         </main>
-
-        <footer class="flex flex-col sm:flex-row items-center justify-between mt-10 text-center animate-fadeInUp" style="animation-delay: 300ms;">
-            <div class="logo-glow">
-                <img src="https://i.ibb.co/WvcTtbST/image.png" alt="Secondary Logo" class="h-10" onerror="this.onerror=null;this.src='https://placehold.co/120x40/5E56F8/FFFFFF?text=Logo';">
-            </div>
-            <div class="font-handwriting text-xl text-text-secondary dark:text-dark-text-secondary mt-4 sm:mt-0">
-                           </div>
-        </footer>
     </div>
     
     <!-- Floating Panels -->
@@ -274,13 +274,76 @@
         </div>
     </div>
 
+    <div id="compensation" class="floating-panel glass-card bg-red-100 dark:bg-red-900/50">
+        <h3 class="font-bold text-lg mb-2 text-red-500"></h3>
+        <button id="copyCompensationBtn" class="w-full mt-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg text-sm hidden">
+          Compensation Script <i class="fas fa-copy"></i>
+        </button>
+    </div>
+
+    <div id="thirdReminder" class="floating-panel glass-card bg-yellow-100 dark:bg-yellow-900/50">
+        <h3 class="font-bold text-lg mb-2 text-yellow-500"><i class="fas fa-exclamation-triangle mr-2"></i>FINAL WARNING!</h3>
+        <p>Requires Compensation</p>
+        <p>Time Left: <span id="timeLeft" class="font-bold text-red-500 p-1 rounded-md" style="animation: blink 1s infinite;">15:00</span></p>
+    </div>
+
+    <div id="rightReminder" class="floating-panel glass-card bg-blue-100 dark:bg-blue-900/50">
+        <h3 id="callAction" class="font-bold text-lg mb-2 text-blue-500"></h3>
+        <div id="callMessage" class="text-sm p-2 bg-background/50 dark:bg-dark-background/50 rounded"></div>
+    </div>
+
     <!-- Floating Action Buttons -->
-    <button id="toggleFailedTrialsBtn" class="floating-btn" title="Toggle Failed Trials Panel"><i class="fas fa-phone-slash"></i></button>
-    <button id="toggleTimeCalcBtn" class="floating-btn" title="Toggle Time Calculator"><i class="fas fa-calculator"></i></button>
-    <button id="toggleRefundSlaBtn" class="floating-btn" title="Toggle Refund SLA Panel"><i class="fas fa-receipt"></i></button>
+    <div class="fixed top-4 left-4 z-50 space-y-2">
+        <button id="toggleFailedTrialsBtn" class="h-12 w-12 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center" title="Toggle Failed Trials"><i class="fas fa-phone-slash"></i></button>
+        <button id="toggleRefundSlaBtn" class="h-12 w-12 bg-amber-500 text-white rounded-full shadow-lg flex items-center justify-center" title="Toggle Refund SLA"><i class="fas fa-receipt"></i></button>
+    </div>
+     <div class="fixed top-20 right-4 z-50 space-y-2">
+        <button id="toggleTimeCalcBtn" class="h-12 w-12 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center" title="Toggle Time Calculator"><i class="fas fa-calculator"></i></button>
+        <button id="contactDriverBtn" class="h-12 w-12 bg-green-500 text-white rounded-full shadow-lg flex items-center justify-center" title="Contact Driver Scenarios"><i class="fas fa-car"></i></button>
+        <button id="smsCstBtn" class="h-12 w-12 bg-purple-500 text-white rounded-full shadow-lg flex items-center justify-center" title="SMS to CST"><i class="fas fa-sms"></i></button>
+    </div>
+
+
+    <!-- Popups -->
+    <div id="compReasonAnimatedPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Compensation Reason</h3>
+            <div id="compReasonPopupText"></div>
+            <button id="closeCompReasonPopup" class="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
+    <div id="contactDriverPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Contact Driver Scenarios</h3>
+            <div class="text-left text-sm space-y-2">
+                <p><b>ETA is stuck or increasing (TGO):</b> The customer gets in touch as the time to wait to be delivered is stuck or increasing. Restaurant informed us that the delivery time will be increased.</p>
+                <p><b>Order will not be processed:</b> The customer wants to check the order status and the vendor cannot proceed with the order - Order Declined / Cancelled by the Restaurant or by Talabat.</p>
+            </div>
+            <button id="closeContactDriverPopup" class="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
+    <div id="smsCstPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3>SMS to send to CST</h3>
+            <div class="text-left text-sm space-y-2">
+                <p><b>Delay in order delivery:</b> The restaurant informed us that the order will be delayed.</p>
+                <p><b>The order is being prepared:</b> The restaurant informed us that they are preparing the order at the moment.</p>
+                <p><b>The order is on the way:</b> The restaurant informed us that the order is being delivered.</p>
+            </div>
+            <button id="closeSmsCstPopup" class="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
+    <!-- Extreme Delay Popup -->
+    <div id="extremeDelayPopup" class="popup-overlay">
+        <div class="popup-content">
+            <h3 id="extremeDelayTitle" class="text-red-500 font-bold">Complain about delay</h3>
+            <p class="mt-2 text-sm">Please contact the driver to understand the reason for the delay.</p>
+            <button id="closeExtremeDelayPopup" class="mt-4 bg-red-500 text-white font-bold py-2 px-4 rounded-lg text-sm">Close</button>
+        </div>
+    </div>
 
     <!-- Marquee -->
-    <div class="marquee">
+    <div class="marquee bg-secondary dark:bg-dark-secondary text-white dark:text-dark-background p-2 border-t-4 border-primary dark:border-dark-primary">
         <div class="marquee-text">
             🚨 If the delay on RST Contact Driver Should be (restaurant hasn't started preparing the food) Check Late Owner 🚨 Refresh the Hurrier every now and then 🚨 If the amount more than (180AED) in UAE (No Refund/No partial refund/No compensation) send the case to EXPO 🚨 Contact drivers - Customer asks about refund: Refund query, Refund action taken by you: Refund request 🚨Online Payment Issues -- First contact from customer: Online Payment Issue 🚨| Customer contacted before SLA: Follow up on existing case 🚨| Case needs to go to R&V team: Online Payment Issue 🚨| Case already with R&V team: Follow up on existing case 🚨| Customer unaware of incomplete order: Online Payment Issue 🚨| Voucher Issues: Customer aware order was incomplete: Voucher already used 🚨| Customer not eligible: Voucher already used 🚨| Customer didn't receive voucher: Voucher not received 🚨
         </div>
@@ -288,7 +351,13 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // --- THEME & 3D BACKGROUND LOGIC ---
+        // --- GLOBAL VARS ---
+        const activeOrders = {};
+        let formResetTimer = null;
+        let thirdReminderTimer = null;
+        let timeLeftInterval = null;
+
+        // --- 3D BACKGROUND & THEME ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), alpha: true });
@@ -352,7 +421,7 @@
         createShapes();
         animate();
 
-        // --- APPLICATION LOGIC ---
+        // --- ELEMENTS ---
         const calculateBtn = document.getElementById("calculateBtn");
         const chatStartInput = document.getElementById("chatStart");
         const orderPlacingInput = document.getElementById("orderPlacing");
@@ -361,12 +430,12 @@
         const fvNfvSelection = document.getElementById("fvNfvSelection");
         const serviceCheckboxes = document.querySelectorAll('input[name="compGroup"]');
         const orderTypeRadios = document.querySelectorAll('input[name="orderType"]');
-
+        
+        // --- FUNCTIONS ---
         function updateCalculateButtonState() {
             const serviceSelected = document.querySelector('input[name="compGroup"]:checked');
             const orderTypeSelected = document.querySelector('input[name="orderType"]:checked');
             let enable = false;
-
             if (serviceSelected) {
                 if (serviceSelected.value === "tmp" || serviceSelected.value === "tgo") {
                     enable = !!orderTypeSelected;
@@ -377,16 +446,301 @@
             calculateBtn.disabled = !enable;
         }
 
+        function triggerError(element) {
+            element.classList.add('error');
+            setTimeout(() => {
+                element.classList.remove('error');
+            }, 820);
+        }
+
+        function validateInputs() {
+            let isValid = true;
+            const chatStartTimeRegex = /^(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i;
+            const orderPlacingTimeRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i;
+            
+            if (!chatStartTimeRegex.test(chatStartInput.value.trim())) {
+                triggerError(chatStartInput);
+                isValid = false;
+            }
+
+            if (!orderPlacingTimeRegex.test(orderPlacingInput.value.trim())) {
+                triggerError(orderPlacingInput);
+                isValid = false;
+            }
+
+            const deliveryMins = orderDeliveryInput.value.trim();
+            if (deliveryMins === '' || isNaN(parseFloat(deliveryMins)) || !isFinite(deliveryMins)) {
+                 triggerError(orderDeliveryInput);
+                 isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function parseTime(input, format) {
+            let match;
+            if (format === 'chat') {
+                // Format: 22.08.2025, 03:27 AM
+                match = input.match(/^(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                if (match) {
+                    const [, day, month, year, hour, minute, period] = match;
+                    let hour24 = parseInt(hour, 10);
+                    if (period.toUpperCase() === 'PM' && hour24 < 12) {
+                        hour24 += 12;
+                    }
+                    if (period.toUpperCase() === 'AM' && hour24 === 12) {
+                        hour24 = 0;
+                    }
+                    return new Date(year, month - 1, day, hour24, minute);
+                }
+            } else if (format === 'order') {
+                // Format: 22.8.2025, 2:18 AM
+                match = input.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+                 if (match) {
+                    const [, day, month, year, hour, minute, period] = match;
+                    let hour24 = parseInt(hour, 10);
+                    if (period.toUpperCase() === 'PM' && hour24 < 12) {
+                        hour24 += 12;
+                    }
+                    if (period.toUpperCase() === 'AM' && hour24 === 12) {
+                        hour24 = 0;
+                    }
+                    return new Date(year, month - 1, day, hour24, minute);
+                }
+            }
+            return null;
+        }
+
+        function getDelayReason(delay, selectedType) {
+            if (selectedType === "tmp") {
+                // For TMP, the reason is always the same regardless of delay duration
+                if (delay > 0) return "Restaurant Late Order - TMP";
+            } else if (selectedType === "tgo") {
+                if (delay > 30) return "Extreme Delay";
+                if (delay >= 21) return "Severe Delay";
+                if (delay > 0) return "Moderate Delay";
+            }
+            return ""; // No reason if not delayed or type doesn't match
+        }
+        
+        function calculateDelay() {
+            if (!validateInputs()) {
+                resultDiv.innerHTML = "Invalid input. Please check the highlighted fields.";
+                resultDiv.className = 'text-center font-bold text-lg p-4 rounded-lg mt-4 bg-red-500 text-white show';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            resetFormFields(300000); // Reset after 5 mins
+
+            const chatTime = parseTime(chatStartInput.value.trim(), 'chat');
+            const orderTime = parseTime(orderPlacingInput.value.trim(), 'order');
+            const deliveryMins = parseFloat(orderDeliveryInput.value);
+
+            if (!chatTime || !orderTime) {
+                resultDiv.innerHTML = "Could not parse time. Please use the correct format.";
+                resultDiv.className = 'text-center font-bold text-lg p-4 rounded-lg mt-4 bg-red-500 text-white show';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            const actualDeliveryTime = new Date(orderTime.getTime() + deliveryMins * 60 * 1000);
+            const delay = (chatTime - actualDeliveryTime) / (1000 * 60);
+
+            const selectedType = document.querySelector('input[name="compGroup"]:checked')?.value;
+            const selectedOrderType = document.querySelector('input[name="orderType"]:checked')?.value;
+
+            let status = "", color = "", showCompensation = false, compensationText = "", minutesToCompensation = 0;
+            const delayReasonText = getDelayReason(delay, selectedType);
+
+
+            if (delay < 0) {
+                status = `✔ On Time: No delay (${Math.abs(delay).toFixed(0)} mins early)`;
+                color = "bg-green-500";
+            } else {
+                status = `⚠ Delayed by ${delay.toFixed(0)} minutes <button id="contactDriverDelayBtn" class="ml-2 bg-white hover:bg-gray-200 text-red-500 font-bold py-1 px-3 rounded-lg text-sm shadow-md">Contact Driver</button>`;
+                if (delay <= 10) color = "bg-yellow-500";
+                else if (delay <= 20) color = "bg-orange-500";
+                else color = "bg-red-500";
+
+                if (selectedType === "tmp") {
+                    if (selectedOrderType === "fv" && delay >= 10) {
+                        showCompensation = true;
+                        compensationText = "TMP FV/tMart Required Compensation (>10 mins)";
+                    } else if (selectedOrderType === "nfv" && delay >= 15) {
+                        showCompensation = true;
+                        compensationText = "TMP NFV Required Compensation (>15 mins)";
+                    }
+                } else if (selectedType === "tgo") {
+                     if (selectedOrderType === "fv" && delay >= 10) {
+                        showCompensation = true;
+                        compensationText = "TGO & Tmart Required Compensation (≥10 mins)";
+                    } else if (selectedOrderType === "nfv" && delay >= 15) {
+                        showCompensation = true;
+                        compensationText = "TGO & Tmart Required Compensation (≥15 mins)";
+                    }
+                }
+            }
+            
+            resultDiv.innerHTML = status;
+            resultDiv.className = `text-center font-bold text-lg p-4 rounded-lg mt-4 ${color} text-white flex items-center justify-center`;
+            resultDiv.classList.remove('hidden');
+
+            const contactDriverDelayBtn = document.getElementById('contactDriverDelayBtn');
+            if (contactDriverDelayBtn) {
+                contactDriverDelayBtn.addEventListener('click', () => {
+                    const popup = document.getElementById('extremeDelayPopup');
+                    const popupTitle = document.getElementById('extremeDelayTitle');
+                    if (delayReasonText) {
+                        popupTitle.textContent = `Complain about: ${delayReasonText}`;
+                    } else {
+                        popupTitle.textContent = 'Complain about delay';
+                    }
+                    popup.classList.add('show');
+                });
+            }
+
+            const compPanel = document.getElementById("compensation");
+            const copyCompBtn = document.getElementById("copyCompensationBtn");
+            if (showCompensation) {
+                compPanel.querySelector('h3').textContent = `⚠ ${compensationText}`;
+                compPanel.classList.add('show');
+                copyCompBtn.classList.remove('hidden');
+                showCompReasonAnimatedPopup(delay, selectedType);
+            }
+
+            if (selectedType === "tmp" || selectedType === "tgo") {
+                let threshold = selectedOrderType === "fv" ? 10 : 15;
+                minutesToCompensation = Math.max(0, threshold - delay);
+                if (minutesToCompensation <= 7 && !showCompensation && minutesToCompensation > 0) {
+                    startThirdReminder(minutesToCompensation, selectedType.toUpperCase());
+                }
+            }
+        }
+
+        function cleanupTimers() {
+            if (formResetTimer) clearTimeout(formResetTimer);
+            if (thirdReminderTimer) clearTimeout(thirdReminderTimer);
+            if (timeLeftInterval) clearInterval(timeLeftInterval);
+            formResetTimer = thirdReminderTimer = timeLeftInterval = null;
+        }
+
+        function resetFormFields(timeout = 0) {
+            cleanupTimers();
+            if (timeout > 0) {
+                formResetTimer = setTimeout(() => resetFormFields(0), timeout);
+            } else {
+                chatStartInput.value = "";
+                orderPlacingInput.value = "";
+                orderDeliveryInput.value = "";
+                serviceCheckboxes.forEach(cb => cb.checked = false);
+                orderTypeRadios.forEach(r => r.checked = false);
+                fvNfvSelection.classList.add('hidden');
+                resultDiv.classList.add('hidden');
+                document.querySelectorAll('.floating-panel').forEach(p => p.classList.remove('show'));
+                document.getElementById('copyCompensationBtn').classList.add('hidden');
+                updateCalculateButtonState();
+            }
+        }
+
+        function startThirdReminder(minutesToCompensation, serviceType) {
+            const thirdReminderPanel = document.getElementById("thirdReminder");
+            const timeLeftSpan = document.getElementById("timeLeft");
+            thirdReminderPanel.classList.add('show');
+            let remainingSeconds = minutesToCompensation * 60;
+
+            if (timeLeftInterval) clearInterval(timeLeftInterval);
+            timeLeftInterval = setInterval(() => {
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    clearInterval(timeLeftInterval);
+                    timeLeftSpan.textContent = "00:00";
+                    thirdReminderPanel.classList.remove('show');
+                    document.getElementById("compensation").classList.add('show');
+                    document.getElementById("copyCompensationBtn").classList.remove('hidden');
+                    return;
+                }
+                const mins = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+                const secs = (remainingSeconds % 60).toString().padStart(2, '0');
+                timeLeftSpan.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+        
+        function showCompReasonAnimatedPopup(delay, selectedType) {
+            const popup = document.getElementById('compReasonAnimatedPopup');
+            const textEl = document.getElementById('compReasonPopupText');
+            const reason = getDelayReason(delay, selectedType);
+            if(reason) {
+                textEl.textContent = reason;
+                popup.classList.add('show');
+            }
+        }
+
+        function startCountdown() {
+            const orderId = document.getElementById("orderIdInput").value.trim();
+            if (!orderId || activeOrders[orderId]) return;
+
+            const timerContainer = document.getElementById("orderTimers");
+            const timerItem = document.createElement("div");
+            timerItem.className = "order-timer-item bg-gray-100 dark:bg-gray-800 p-2 rounded-lg flex items-center justify-between";
+            timerItem.id = `timer-${orderId}`;
+            
+            timerItem.innerHTML = `
+                <div class="flex-grow flex items-center">
+                    <span class="font-bold mr-2">Order ${orderId}:</span>
+                    <span class="timer-display font-mono text-lg">10:00</span>
+                </div>
+                <div class="w-24 h-2 bg-gray-300 dark:bg-gray-600 rounded-full overflow-hidden mx-4">
+                    <div class="timer-progress-bar bg-primary h-full"></div>
+                </div>
+                <button class="delete-timer text-red-500 hover:text-red-700"><i class="fas fa-times-circle"></i></button>
+            `;
+            timerContainer.prepend(timerItem);
+
+            activeOrders[orderId] = {
+                seconds: 600,
+                interval: null,
+                element: timerItem
+            };
+
+            const timerDisplay = timerItem.querySelector(".timer-display");
+            const progressBar = timerItem.querySelector(".timer-progress-bar");
+
+            activeOrders[orderId].interval = setInterval(() => {
+                activeOrders[orderId].seconds--;
+                const s = activeOrders[orderId].seconds;
+                if (s <= 0) {
+                    clearInterval(activeOrders[orderId].interval);
+                    timerDisplay.textContent = "Time's up!";
+                    timerItem.classList.add('bg-red-200', 'dark:bg-red-800/50');
+                } else {
+                    const mins = Math.floor(s / 60).toString().padStart(2, '0');
+                    const secs = (s % 60).toString().padStart(2, '0');
+                    timerDisplay.textContent = `${mins}:${secs}`;
+                    progressBar.style.width = `${(s / 600) * 100}%`;
+                }
+            }, 1000);
+
+            timerItem.querySelector('.delete-timer').addEventListener('click', () => {
+                clearInterval(activeOrders[orderId].interval);
+                delete activeOrders[orderId];
+                timerItem.remove();
+            });
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('resetBtn').addEventListener('click', () => resetFormFields(0));
+        calculateBtn.addEventListener('click', calculateDelay);
+        document.getElementById('startCountdownBtn').addEventListener('click', startCountdown);
+
         serviceCheckboxes.forEach(checkbox => {
             checkbox.addEventListener("change", function () {
                 if (this.checked) {
                     serviceCheckboxes.forEach(cb => { if (cb !== this) cb.checked = false; });
                 }
-                if (this.value === "tmp" || this.value === "tgo") {
-                    fvNfvSelection.classList.remove('hidden');
-                } else {
-                    fvNfvSelection.classList.add('hidden');
-                    orderTypeRadios.forEach(r => r.checked = false);
+                fvNfvSelection.classList.toggle('hidden', !(this.value === "tmp" || this.value === "tgo"));
+                if (!fvNfvSelection.classList.contains('hidden')) {
+                     orderTypeRadios.forEach(r => r.checked = false);
                 }
                 updateCalculateButtonState();
             });
@@ -395,81 +749,32 @@
         orderTypeRadios.forEach(radio => {
             radio.addEventListener("change", updateCalculateButtonState);
         });
+
+        // Floating Panels & Popups Logic
+        document.getElementById('toggleFailedTrialsBtn').addEventListener('click', () => document.getElementById('failedTrials').classList.toggle('show'));
+        document.getElementById('toggleTimeCalcBtn').addEventListener('click', () => document.getElementById('timeCalculator').classList.toggle('show'));
+        document.getElementById('toggleRefundSlaBtn').addEventListener('click', () => document.getElementById('refundSlaPanel').classList.toggle('show'));
         
-        calculateBtn.addEventListener('click', calculateDelay);
+        document.getElementById('contactDriverBtn').addEventListener('click', () => document.getElementById('contactDriverPopup').classList.add('show'));
+        document.getElementById('smsCstBtn').addEventListener('click', () => document.getElementById('smsCstPopup').classList.add('show'));
+        document.getElementById('closeCompReasonPopup').addEventListener('click', () => document.getElementById('compReasonAnimatedPopup').classList.remove('show'));
+        document.getElementById('closeContactDriverPopup').addEventListener('click', () => document.getElementById('contactDriverPopup').classList.remove('show'));
+        document.getElementById('closeSmsCstPopup').addEventListener('click', () => document.getElementById('smsCstPopup').classList.remove('show'));
+        document.getElementById('closeExtremeDelayPopup').addEventListener('click', () => document.getElementById('extremeDelayPopup').classList.remove('show'));
 
-        function parseTime(input) {
-            let match = input.match(/(\d{2})\.(\d{2})\.(\d{4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-            if (match) {
-                const [, day, month, year, hour, minute, period] = match;
-                return new Date(`${year}-${month}-${day} ${hour}:${minute} ${period}`);
-            }
-            if (Date.parse(input)) { return new Date(input); }
-            return null;
-        }
-
-        function calculateDelay() {
-            const chatTime = parseTime(chatStartInput.value.trim());
-            const orderTime = parseTime(orderPlacingInput.value.trim());
-            const deliveryMins = parseFloat(orderDeliveryInput.value);
-
-            if (!chatTime || !orderTime || isNaN(deliveryMins)) {
-                resultDiv.textContent = "Invalid input. Please check all fields.";
-                resultDiv.style.backgroundColor = "#ef4444";
-                resultDiv.classList.remove('hidden');
-                return;
-            }
-
-            const actualDeliveryTime = new Date(orderTime.getTime() + deliveryMins * 60 * 1000);
-            const delay = (chatTime - actualDeliveryTime) / (1000 * 60);
-
-            let status = "", color = "";
-            if (delay < 0) {
-                status = `✔ On Time: No delay (${Math.abs(delay).toFixed(0)} mins early)`;
-                color = "#22c55e";
-            } else {
-                status = `⚠ Delayed by ${delay.toFixed(0)} minutes`;
-                if (delay <= 10) color = "#f59e0b";
-                else if (delay <= 20) color = "#f97316";
-                else color = "#ef4444";
-            }
-            resultDiv.textContent = status;
-            resultDiv.style.backgroundColor = color;
-            resultDiv.classList.remove('hidden');
-        }
-
-        window.resetFormFields = (timeout = 0) => {
-            chatStartInput.value = "";
-            orderPlacingInput.value = "";
-            orderDeliveryInput.value = "";
-            serviceCheckboxes.forEach(cb => cb.checked = false);
-            orderTypeRadios.forEach(r => r.checked = false);
-            fvNfvSelection.classList.add('hidden');
-            resultDiv.classList.add('hidden');
-            updateCalculateButtonState();
-        };
-        
-        // --- Floating Panels Logic ---
-        document.getElementById('toggleFailedTrialsBtn').addEventListener('click', () => {
-            document.getElementById('failedTrials').classList.toggle('show');
-        });
-        document.getElementById('toggleTimeCalcBtn').addEventListener('click', () => {
-            document.getElementById('timeCalculator').classList.toggle('show');
-        });
-        document.getElementById('toggleRefundSlaBtn').addEventListener('click', () => {
-            document.getElementById('refundSlaPanel').classList.toggle('show');
-        });
 
         // Add 10 Minutes Calculator Logic
         document.getElementById('timeCalcBtn').addEventListener('click', () => {
             const timeInput = document.getElementById('endTimeInput').value.trim();
             const resultEl = document.getElementById('timeCalcResult');
-            const parsedTime = parseTime(`01.01.2025, ${timeInput}`); // Use dummy date for parsing
-            if (parsedTime) {
-                parsedTime.setMinutes(parsedTime.getMinutes() + 10);
-                const hours = parsedTime.getHours() % 12 || 12;
-                const minutes = parsedTime.getMinutes().toString().padStart(2, '0');
-                const period = parsedTime.getHours() >= 12 ? 'PM' : 'AM';
+            // A bit of a hack to parse AM/PM time without a full date
+            const tempDate = new Date(`01/01/2000 ${timeInput}`);
+
+            if (!isNaN(tempDate.getTime())) {
+                tempDate.setMinutes(tempDate.getMinutes() + 10);
+                const hours = tempDate.getHours() % 12 || 12;
+                const minutes = tempDate.getMinutes().toString().padStart(2, '0');
+                const period = tempDate.getHours() >= 12 ? 'PM' : 'AM';
                 resultEl.textContent = `New Time: ${hours}:${minutes} ${period}`;
             } else {
                 resultEl.textContent = "Invalid time format";
@@ -495,6 +800,56 @@
                 slaDetails.classList.add('hidden');
             }
         });
+        
+        document.getElementById('copyCompensationBtn').addEventListener('click', function() {
+            const textToCopy = "كاعتذار مننا سوف نقوم بإضافة مبلغ كقسيمة على محفظة القسائم تقدر تستخدمها مع الطلبات الكاش والاونلاين عن طريق التطبيق";
+            
+            // Create a temporary textarea element to hold the text
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            
+            // Style it to be invisible
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = 'Copied! <i class="fas fa-check"></i>';
+                    setTimeout(() => { this.innerHTML = originalText; }, 2000);
+                } else {
+                    console.error('Fallback: Oops, unable to copy');
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            
+            document.body.removeChild(textArea);
+        });
+
+
+        // Seamless Marquee Logic
+        const marqueeText = document.querySelector('.marquee-text');
+        if (marqueeText) {
+            const content = marqueeText.innerHTML;
+            marqueeText.innerHTML += `&nbsp;&nbsp;&nbsp;${content}`;
+        }
+
+        // Initial setup
+        updateCalculateButtonState();
     });
     </script>
 </body>
