@@ -304,7 +304,7 @@
             <img src="https://i.ibb.co/WvcTtbST/image.png" alt="Secondary Logo" class="h-10" onerror="this.onerror=null;this.src='https://placehold.co/120x40/5E56F8/FFFFFF?text=Logo';">
         </div>
         <div class="font-handwriting text-xl text-text-secondary dark:text-dark-text-secondary mt-4 sm:mt-0">
-                  </div>
+        </div>
     </footer>
 
     <script>
@@ -381,7 +381,7 @@
         createShapes();
         animate();
 
-        // --- ORIGINAL APPLICATION LOGIC ---
+        // --- UPDATED APPLICATION LOGIC ---
         
         // Data structure for quick actions
         let quickActionSections = [
@@ -404,6 +404,45 @@
                  { text: "Extra Amount Charged", tooltip: "Extra Amount Charged" }, { text: "Money collection issue", tooltip: "Money collection issue" },
                  { text: "Order not delivered", tooltip: "Order not delivered" }, { text: "Order marked as delivered but didn't receive", tooltip: "Order marked as delivered but didn't receive" }, 
                  { text: "Order not assigned to a rider", tooltip: "Order not assigned to a rider" }
+            ]},
+            { name: "Cancellation Requests", actions: [
+                { text: "CST asked to cancel due to change of mind", tooltip: "Cancel: Change of mind" },
+                { text: "CST asked to cancel due to late delivery", tooltip: "Cancel: Late delivery" },
+                { text: "CST asked to cancel due to unavailable item", tooltip: "Cancel: Unavailable item" },
+                { text: "CST insist on cancellation", tooltip: "CST insists on cancel" },
+                { text: "Cancel order due to late/owner decision", tooltip: "Cancel: Late/owner decision" },
+                { text: "Cancel order due to fake order (Shield)", tooltip: "Cancel: Fake order" }
+            ]},
+            { name: "Modification Requests", actions: [
+                { text: "CST asked to Modify order", tooltip: "Modify order" },
+                { text: "CST asked to change address", tooltip: "Change address" },
+                { text: "Update CST phone number", tooltip: "Update phone number" },
+                { text: "CST asked to change payment method", tooltip: "Change payment method" },
+                { text: "Modify items of order", tooltip: "Modify items" },
+                { text: "Update address on BOA (Backoffice)", tooltip: "BOA address update" }
+            ]},
+            { name: "Food Quality Issues", actions: [
+                { text: "Food Quality/Spilled food (Burnt/Undercooked)", tooltip: "Poor food quality" },
+                { text: "T mart Bad Quality", tooltip: "T mart quality issue" },
+                { text: "Food temperature issues", tooltip: "Temperature issue" },
+                { text: "Cooking instruction not followed", tooltip: "Cooking not followed" },
+                { text: "Foreign object in food", tooltip: "Foreign object" },
+                { text: "Expired/Nearly expired items", tooltip: "Expired items" }
+            ]},
+            { name: "Order Accuracy Issues", actions: [
+                { text: "Wrong order received", tooltip: "Wrong order" },
+                { text: "Missing item", tooltip: "Missing item" },
+                { text: "Wrong item received", tooltip: "Wrong item" },
+                { text: "Combo Meal Side item missing", tooltip: "Missing combo item" },
+                { text: "Item replacement process issue", tooltip: "Replacement issue" }
+            ]},
+            { name: "Technical & System Issues", actions: [
+                { text: "Online Payment issue", tooltip: "Payment issue" },
+                { text: "Payment method issue", tooltip: "Payment method issue" },
+                { text: "Subscription/premium service issue", tooltip: "Subscription issue" },
+                { text: "Fill T Mart Form issue", tooltip: "T Mart form issue" },
+                { text: "Fill Fraud Form", tooltip: "Fraud form" },
+                { text: "Hurrier status issue", tooltip: "Hurrier issue" }
             ]},
             { name: "Response Status", actions: [
                 { text: "Answered", tooltip: "Answered (ANS)" }, { text: "Not Answered", tooltip: "Not Answered" },
@@ -512,7 +551,12 @@
             '!refund': 'Processed partial refund of [amount] as per policy. Customer notified via SMS.',
             '!delivery': 'Order delayed by [time]. Contacted rider (RNA). Updated customer with new ETA: [time].',
             '!complaint': 'Customer complained about [issue]. Apologized and offered [solution]. Case marked as [status].',
+            '!tc': 'Issued Talabat Credit of [amount] as compensation. Customer informed.',
+            '!followup': 'Case requires follow-up. Scheduled callback for [date/time].',
+            '!escalate': 'Escalated to [TL/SPV] for further investigation. Case marked as high priority.',
             '!lateorder': 'CST complain about late order. Rider status: [status]. Informed CST with End Time +10 minutes. CST info.',
+            '!notdelivered': 'Order marked as delivered but CST didn\'t receive. No PIN Code. Rider not moving (RNA). Advice CST to wait. CST info.',
+            '!missingitem': 'CST complain about missing item [item]. Item amount [amount]. CST said package was sealed. [Less/More] than threshold. [Action taken]. CST info.'
         };
 
         const commonMisspellings = [
@@ -532,10 +576,79 @@
         let savedTemplates = [
             { name: 'Complaint', content: 'Customer complained about [issue]. Apologized and offered [solution]. Case marked as [status].' },
             { name: 'Refund', content: 'Processed [partial/full] refund of [amount] due to [reason]. Customer [satisfied/not satisfied].' },
-            { name: 'Delivery', content: 'Order #12345 delayed by [time]. Contacted rider (RNA). Updated customer with new ETA: [time].' },
+            { name: 'Delivery', content: 'Order #[orderId] delayed by [time]. Contacted rider ([status]). Updated customer with new ETA: [time].' },
             { name: 'Late Order', content: 'CST complain about late order. Rider status: [status]. Informed CST with End Time +10 minutes. CST info.' },
-            { name: 'Not Delivered', content: 'Order marked as delivered but CST didn\'t receive. No PIN Code. Rider not moving (RNA). Advice CST to wait. CST info.' },
-            { name: 'Missing Item', content: 'CST complain about missing item [item]. Item amount [amount]. CST said package was sealed. [Less/More] than threshold. [Action taken]. CST info.' }
+            { name: 'Not Delivered', content: 'Order marked as delivered but CST didn\'t receive. No PIN Code. Rider not moving (RNA). Advised CST to wait. CST info.' },
+            { name: 'Missing Item', content: 'CST complain about missing item [item]. Item amount [amount]. CST said package was sealed. [Less/More] than threshold. [Action taken]. CST info.' },
+            { name: 'Modify Order', content: 'CST asked to modify order. Called RST ROP ([status]) and confirmed new amount ([amount]). New amount added on Hurrier. CST info.' },
+            { name: 'Modify Item Paid Online', content: 'CST asked to modify items. Order paid online, can’t take action. CST will keep the order. CST info.' },
+            { name: 'Change Address - TGO', content: 'CST asked to change address to ([newAddress]). Checked on Hurrier. Address in same rider zone, action taken. CST info.' },
+            { name: 'Change Address - Out of Zone', content: 'CST asked to change address to ([newAddress]). Checked on Hurrier, more than 7KM, utilization <75%. Cannot change address. CST asked to cancel, informed with cancellation policy. CST info.' },
+            { name: 'Change Mobile - TGO', content: 'CST asked to modify mobile number to ([newNumber]). Updated CST phone number at Hurrier special instruction. CST info.' },
+            { name: 'Change Address - TMP', content: 'CST asked to change address to ([newAddress]). Asked CST if permanent or for this order. Called RST ROP ([status]) and updated address on BOA. CST info.' },
+            { name: 'Change Mobile - TMP', content: 'CST asked to change number to ([newNumber]). Asked if for all upcoming orders or this order only. Called RST ROP ([status]) and updated. CST info.' },
+            { name: 'Delivery Instruction', content: 'CST asked to ([instruction]). Called RST ROP ([status]) confirmed with CST. CST info.' },
+            { name: 'Cooking Instruction', content: 'CST asked to add cooking instruction ([instruction]). Called RST ROP ([status]) and confirmed. CST info.' },
+            { name: 'Online Payment Issue', content: 'CST has incomplete order ID ([orderId]). Informed CST with SLA. On second contact, case sent to R&V. CST info.' },
+            { name: 'Wrong Order - TGO', content: 'CST complained about full wrong order ([details]). Shared photo of order & invoice. Rider stacked with [1/2] orders. Called RST ROP ([status]). Action taken. CST info.' },
+            { name: 'Wrong Order - TMP', content: 'CST complained about full wrong order ([details]). Shared photo of order & invoice. Asked for refund/replacement. Called RST ROP ([status]). Action taken. CST info.' },
+            { name: 'Wrong Item - TGO', content: 'CST complained about wrong item ([item]). Amount ([amount]). Shared photo. Called RST ROP ([status]). Action taken. CST info.' },
+            { name: 'Wrong Item - TMP', content: 'CST complained about wrong item ([item]). Amount ([amount]). Shared photo. Called RST ROP ([status]) and said will call CST to solve. Action taken. CST info.' },
+            { name: 'Cooking Instruction Not Followed', content: 'CST complained cooking instruction not followed ([instruction]). Shared photo. Called RST RNA. CST good history. Request unpaid. Action taken. CST info.' },
+            { name: 'Request', content: 'Customer asked to cancel order due to (00). Tried to retain but customer insisted. Called store, no answer. Order not picked up, cancelled, and customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel order due to (00). Tried to retain but customer insisted. Called restaurant ROP, order started preparing, informed customer that cancellation not possible. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel order due to (00). Tried to retain but customer insisted. Called restaurant ROP, cancelled order, and informed customer. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel order because it was late. Tried to retain but customer insisted. Order cancelled due to late owner. Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel order because it was late. Tried to retain but customer insisted. Called restaurant ROP, cancellation confirmed. Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer placed duplicate orders with IDs ( ) and ( ). Customer requested to keep only one order. Cancelled order ID ( ) and informed customer. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel due to unavailable item. Checked shopper tool, item ( ) removed and amount modified. Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked to cancel due to unavailable item. Checked shopper tool, item not removed. Called store, no answer. Asked customer for vendor number. Customer informed. Case marked as pending.' },
+            { name: 'Request', content: 'Customer asked to cancel due to unavailable item. Tried to retain but customer insisted. Called restaurant ROP, confirmed and hid item. Order cancelled and customer informed. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer complained about item ( ) worth ( ) received ( ). Shared photo. Called restaurant ROP, agreed eligible for partial refund. Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about item ( ) worth ( ) received ( ). Shared photo. Called restaurant ROP, said restaurant will call customer to solve issue. Eligible for partial refund. Action taken and customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about food temperature/quality (taste/smell). Apologized and took action. Customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about full order ( ) undercooked/burnt. Shared photo and asked for refund/re-delivery. Called restaurant ROP, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about full order spilled. Shared photo but no invoice. Customer has good history. Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about full order ( ) undercooked/spilled. Shared photo and asked for refund/re-delivery. Called restaurant ROP, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart item/full order received in bad quality ( ). Shared photo, issue below threshold. Action taken, T-Mart issue form filled. Customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart item/full order in bad quality ( ). Shared photo, issue above threshold. Called mart 3 times, no answer. Customer has good history. T-Mart issue form filled, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Request', content: 'Customer followed up on order WDT. Informed with remaining time and advised to wait. Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer followed up on order WDT. Informed with WDT and ETA ( ). Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer followed up on order WDT. Shared Americana live tracking link and advised to check SMS. Customer informed. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Called restaurant ROP ( ), order OTW. ROP will hurry rider and call customer. Customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Called restaurant, no answer. Advised customer to wait. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Called restaurant ROP ( ), order still preparing. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Called restaurant ROP ( ), order canceled due (00). Order canceled and customer informed. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Rider status (Accepted). Informed customer and left note to rider on Hurrier. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Rider status (Near pickup). Called rider, he was waiting at restaurant. Asked rider to hurry up and call customer. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Rider status (Near pickup). Called rider no answer. Called restaurant ROP ( ). Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Rider status (Left pickup). Left note on Hurrier to speed up and call customer. Informed customer with rider status and end time ( ) +10 min. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Rider status (Near drop-off). Called rider, no answer. Advised customer to wait. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Order not assigned to a rider. Hurrier status ( ). Advised customer to wait. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about late order. Order not assigned to a rider. Hurrier status ( ). Customer asked to cancel. Order more than 50% of delivery time passed. Action taken and customer informed. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer said order marked as delivered but not received. No PIN code, no transcript, drop-off matched location. Order completed more than 10 min. Customer confirmed correct address. Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer said order marked as delivered but not received. No PIN code, no transcript, drop-off matched location. Order completed less than 10 min. Advised customer to wait. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about missing item ( ) worth ( ). Order sealed/not sealed. Called restaurant, no answer. Customer eligible. Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about missing item ( ) worth ( ). Called restaurant ROP ( ), vendor will call customer to solve. Customer eligible. Action taken and customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about missing side item ( ) from combo meal ( ). Item has no price in system. Customer eligible for compensation. Called restaurant ROP ( ). Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer followed up on existing case regarding refund. Checked order ID on Slack for feedback. Advised customer to wait. Case marked as pending.' },
+            { name: 'Request', content: 'Customer asked about cancellation reason. Order canceled due ( ). Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer asked about cancellation reason. Order canceled due fake order - Shield. Customer informed with script. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer requested refund for canceled order. Action taken from BOA (00). Customer informed about amount and terms. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about item replacement process. Missing item, order modified. Customer informed. Case marked as resolved.' },
+            { name: 'Request', content: 'Customer requested to cancel T-Pro subscription. Sent steps to customer. Case marked as closed.' },
+            { name: 'Request', content: 'Customer requested to cancel order due to fraud. Different BOA data. Called customer, no answer. Filled fraud form. Customer informed case escalated to concerned team. Case marked as pending.' },
+            { name: 'Request', content: 'Customer asked to change payment method due to no cash. Advised customer not possible. Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer followed up on order. Status in progress, rider accepted. Called rider, OTW to restaurant. Called restaurant ROP ( ), order still upcoming. Customer informed. Case marked as pending.' },
+            { name: 'Request', content: 'Customer requested to modify T-Mart order. Not possible. Customer informed. Case marked as closed.' },
+            { name: 'Complaint', content: 'Customer asked about T-Pro cancellation refund. Form sent earlier but SLA exceeded, no response. Sent form again. Called customer, no answer. Informed via chat. Case marked as pending.' },
+            { name: 'Request', content: 'Customer asked if pre-order will deliver today or tomorrow. Checked BOA, delivery scheduled at ( ). Customer informed. Case marked as closed.' },
+            { name: 'Request', content: 'Customer said doesn’t know how to apply T-Pro promo code. Called customer, explained steps, promo option missing. Troubleshot as technical issue. Customer informed. Case marked as pending.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart wrong full order ( ). Shared photo with invoice. Rider had only 1 order. Called mart 3 times, no answer. Customer has good history. Action taken and customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart wrong item ( ). Shared photo, below threshold. Eligible for partial refund. T-Mart issue form filled, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart wrong item ( ). Shared photo, above threshold. Eligible for partial refund. Called mart 3 times, no answer. T-Mart issue form filled, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart missing item ( ) worth ( ). Package was sealed. Below threshold, eligible for partial refund. T-Mart issue form filled, action taken, customer informed. Case marked as resolved.' },
+            { name: 'Complaint', content: 'Customer complained about T-Mart missing item ( ) worth ( ). Package was sealed. Above threshold. Called mart, no answer. Eligible for partial refund. T-Mart issue form filled, action taken, customer informed. Case marked as resolved.' },
         ];
         let historyItems = [];
         const MAX_HISTORY_ITEMS = 15;
