@@ -513,14 +513,14 @@
 
         function getDelayReason(delay, selectedType) {
             if (selectedType === "tmp") {
-                // For TMP, the reason is always the same regardless of delay duration
                 if (delay > 0) return "Restaurant Late Order - TMP";
             } else if (selectedType === "tgo") {
                 if (delay > 30) return "Extreme Delay";
-                if (delay >= 21) return "Severe Delay";
-                if (delay > 0) return "Moderate Delay";
+                if (delay > 20) return "Severe Delay";
+                if (delay > 10) return "Moderate Delay";
+                if (delay > 0) return "Short Delay";
             }
-            return ""; // No reason if not delayed or type doesn't match
+            return "";
         }
         
         function calculateDelay() {
